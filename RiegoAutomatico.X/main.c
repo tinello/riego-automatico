@@ -6,6 +6,8 @@
  */
 
 
+
+
 // PIC16F819 Configuration Bit Settings
 
 // 'C' source line config statements
@@ -14,8 +16,8 @@
 #pragma config FOSC = INTOSCIO  // Oscillator Selection bits (INTRC oscillator; port I/O function on both RA6/OSC2/CLKO pin and RA7/OSC1/CLKI pin)
 #pragma config WDTE = OFF       // Watchdog Timer Enable bit (WDT disabled)
 #pragma config PWRTE = OFF      // Power-up Timer Enable bit (PWRT disabled)
-#pragma config MCLRE = ON       // RA5/MCLR/VPP Pin Function Select bit (RA5/MCLR/VPP pin function is MCLR)
-#pragma config BOREN = ON       // Brown-out Reset Enable bit (BOR enabled)
+#pragma config MCLRE = OFF      // RA5/MCLR/VPP Pin Function Select bit (RA5/MCLR/VPP pin function is digital I/O, MCLR internally tied to VDD)
+#pragma config BOREN = OFF      // Brown-out Reset Enable bit (BOR disabled)
 #pragma config LVP = ON         // Low-Voltage Programming Enable bit (RB3/PGM pin has PGM function, Low-Voltage Programming enabled)
 #pragma config CPD = OFF        // Data EE Memory Code Protection bit (Code protection off)
 #pragma config WRT = OFF        // Flash Program Memory Write Enable bits (Write protection off)
@@ -27,15 +29,20 @@
 
 #include <xc.h>
 
+//Paso 3
+#define _XTAL_FREQ 8000000
 
-void main(void) {
-    
-    int x = 0;
-    
-    while (x == 0) {
-        _delay(1000);
-        x = x + 1;
-    }
-    
-    return;
+void main(void){
+  TRISB = 0; //RB0 as Output PIN
+  OSCCON = 0x76;
+  
+  
+  while(1)
+  {
+    PORTBbits.RB0 = 1;  // LED ON
+    __delay_ms(1000); // 1 Second Delay
+    PORTBbits.RB0 = 0;  // LED OFF
+    __delay_ms(1000); // 1 Second Delay
+  }
+  return;
 }

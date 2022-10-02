@@ -4,15 +4,15 @@ __S2 0 0 ABS 0
 __S3 0 0 ABS 0
 __Hintentry 0 0 CODE 0
 __Lintentry 0 0 CODE 0
-_main 7E5 0 CODE 0
+_main 7D7 0 CODE 0
 ___sp 0 0 STACK 2
 btemp 7E 0 ABS 0
 start 0 0 CODE 0
+_TRISB 86 0 ABS 0
 reset_vec 0 0 CODE 0
 wtemp0 7E 0 ABS 0
 __Hconfig 2008 0 CONFIG 4
 __Lconfig 0 0 CONFIG 4
-main@x 71 0 COMMON 1
 __Hram 0 0 ABS 0
 __Lram 0 0 ABS 0
 __Hfunctab 0 0 ENTRY 0
@@ -22,6 +22,7 @@ __Lcommon 0 0 ABS 0
 __Heeprom_data 0 0 EEDATA 3
 __Leeprom_data 0 0 EEDATA 3
 ___int_sp 0 0 STACK 2
+_OSCCON 8F 0 ABS 0
 __Habs1 0 0 ABS 0
 __Labs1 0 0 ABS 0
 __Hsfr0 0 0 ABS 0
@@ -42,6 +43,7 @@ __Htext 0 0 ABS 0
 __Ltext 0 0 ABS 0
 end_of_initialization 7FE 0 CODE 0
 ___stacklo 0 0 ABS 0
+_PORTBbits 6 0 ABS 0
 __Hstrings 0 0 ABS 0
 __Lstrings 0 0 ABS 0
 __Hbank0 0 0 ABS 0
@@ -89,27 +91,26 @@ __pcstackCOMMON 70 0 COMMON 1
 start_initialization 7FE 0 CODE 0
 __Hmaintext 0 0 ABS 0
 __Lmaintext 0 0 ABS 0
-__pmaintext 7E5 0 CODE 0
+__pmaintext 7D7 0 CODE 0
 __initialization 7FE 0 CODE 0
 %segments
 reset_vec 0 1 CODE 0 0
 cinit FFC FFF CODE FFC 0
 cstackCOMMON 70 72 COMMON 70 1
-maintext FCA FFB CODE FCA 0
+maintext FAE FFB CODE FAE 0
 %locals
 dist/default/production/RiegoAutomatico.X.production.o
-/tmp/xcXOapphM.s
-286 7FE 0 CODE 0
-289 7FE 0 CODE 0
+/tmp/xcXBAKiAN.s
+292 7FE 0 CODE 0
 295 7FE 0 CODE 0
-297 7FE 0 CODE 0
-298 7FF 0 CODE 0
+301 7FE 0 CODE 0
+303 7FE 0 CODE 0
+304 7FF 0 CODE 0
 main.c
-31 7E5 0 CODE 0
-33 7E5 0 CODE 0
-35 7E7 0 CODE 0
-36 7E8 0 CODE 0
-37 7EF 0 CODE 0
-37 7F3 0 CODE 0
-35 7F7 0 CODE 0
-41 7FD 0 CODE 0
+35 7D7 0 CODE 0
+36 7D7 0 CODE 0
+37 7DA 0 CODE 0
+42 7DC 0 CODE 0
+43 7DF 0 CODE 0
+44 7EC 0 CODE 0
+45 7EF 0 CODE 0

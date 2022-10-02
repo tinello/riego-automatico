@@ -7,12 +7,12 @@
 # 1 "/home/gustavo/.mchp_packs/Microchip/PIC16Fxxx_DFP/1.3.42/xc8/pic/include/language_support.h" 1 3
 # 2 "<built-in>" 2
 # 1 "main.c" 2
-# 14 "main.c"
+# 16 "main.c"
 #pragma config FOSC = INTOSCIO
 #pragma config WDTE = OFF
 #pragma config PWRTE = OFF
-#pragma config MCLRE = ON
-#pragma config BOREN = ON
+#pragma config MCLRE = OFF
+#pragma config BOREN = OFF
 #pragma config LVP = ON
 #pragma config CPD = OFF
 #pragma config WRT = OFF
@@ -1322,17 +1322,22 @@ extern __bank0 unsigned char __resetbits;
 extern __bank0 __bit __powerdown;
 extern __bank0 __bit __timeout;
 # 29 "/home/gustavo/.mchp_packs/Microchip/PIC16Fxxx_DFP/1.3.42/xc8/pic/include/xc.h" 2 3
-# 29 "main.c" 2
+# 31 "main.c" 2
 
 
-void main(void) {
 
-    int x = 0;
 
-    while (x == 0) {
-        _delay(1000);
-        x = x + 1;
-    }
+void main(void){
+  TRISB = 0;
+  OSCCON = 0x76;
 
-    return;
+
+  while(1)
+  {
+    PORTBbits.RB0 = 1;
+    _delay((unsigned long)((1000)*(8000000/4000.0)));
+    PORTBbits.RB0 = 0;
+    _delay((unsigned long)((1000)*(8000000/4000.0)));
+  }
+  return;
 }
