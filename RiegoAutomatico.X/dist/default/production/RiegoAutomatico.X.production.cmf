@@ -11,12 +11,12 @@
 # All addresses and the length are given in unqualified hexadecimal
 # in delta units.  Any other numeric values are decimal.
 %PSECTS
-$/tmp/xcXOlfLhB.o
+$/tmp/xcXHpmfOB.o
 end_init CODE 0 0 0 1 2
 config CONFIG 4 2007 2007 1 2
 $dist/default/production/RiegoAutomatico.X.production.o
 cinit CODE 0 7FE 7FE 2 2
-maintext CODE 0 7D7 7D7 27 2
+maintext CODE 0 775 775 89 2
 cstackCOMMON COMMON 1 70 70 3 1
 config CONFIG 4 2007 2007 1 2
 # %UNUSED Section
@@ -31,19 +31,19 @@ RAM 120-16F 1
 BANK0 20-6F 1
 BANK1 A0-EF 1
 BANK2 120-16F 1
-CONST 1-7D6 2
-ENTRY 1-7D6 2
+CONST 1-774 2
+ENTRY 1-774 2
 IDLOC 2000-2003 2
 STACK 20-6F 1
-CODE 1-7D6 2
+CODE 1-774 2
 SFR0 0-1F 1
 SFR1 80-9F 1
 SFR2 100-11F 1
 SFR3 180-1EF 1
 COMMON 73-7D 1
 EEDATA 2100-21FF 2
-STRCODE 1-7D6 2
-STRING 1-7D6 2
+STRCODE 1-774 2
+STRING 1-774 2
 # %LINETAB Section
 # This section enumerates the file/line to address mappings.
 # The beginning of the section is indicated by %LINETAB.
@@ -58,18 +58,46 @@ STRING 1-7D6 2
 # All other numeric values are in decimal.
 %LINETAB
 $dist/default/production/RiegoAutomatico.X.production.o
-7FE cinit CODE >292:/tmp/xcXBAKiAN.s
-7FE cinit CODE >295:/tmp/xcXBAKiAN.s
-7FE cinit CODE >301:/tmp/xcXBAKiAN.s
-7FE cinit CODE >303:/tmp/xcXBAKiAN.s
-7FF cinit CODE >304:/tmp/xcXBAKiAN.s
-7D7 maintext CODE >35:/home/gustavo/dev/pic/RiegoAutomatico/RiegoAutomatico.X/main.c
-7D7 maintext CODE >36:/home/gustavo/dev/pic/RiegoAutomatico/RiegoAutomatico.X/main.c
-7DA maintext CODE >37:/home/gustavo/dev/pic/RiegoAutomatico/RiegoAutomatico.X/main.c
-7DC maintext CODE >42:/home/gustavo/dev/pic/RiegoAutomatico/RiegoAutomatico.X/main.c
-7DF maintext CODE >43:/home/gustavo/dev/pic/RiegoAutomatico/RiegoAutomatico.X/main.c
-7EC maintext CODE >44:/home/gustavo/dev/pic/RiegoAutomatico/RiegoAutomatico.X/main.c
-7EF maintext CODE >45:/home/gustavo/dev/pic/RiegoAutomatico/RiegoAutomatico.X/main.c
+7FE cinit CODE >294:/tmp/xcXodpgFb.s
+7FE cinit CODE >297:/tmp/xcXodpgFb.s
+7FE cinit CODE >303:/tmp/xcXodpgFb.s
+7FE cinit CODE >305:/tmp/xcXodpgFb.s
+7FF cinit CODE >306:/tmp/xcXodpgFb.s
+775 maintext CODE >35:/home/gustavo/dev/pic/RiegoAutomatico/RiegoAutomatico.X/main.c
+775 maintext CODE >39:/home/gustavo/dev/pic/RiegoAutomatico/RiegoAutomatico.X/main.c
+778 maintext CODE >40:/home/gustavo/dev/pic/RiegoAutomatico/RiegoAutomatico.X/main.c
+779 maintext CODE >41:/home/gustavo/dev/pic/RiegoAutomatico/RiegoAutomatico.X/main.c
+77A maintext CODE >44:/home/gustavo/dev/pic/RiegoAutomatico/RiegoAutomatico.X/main.c
+77B maintext CODE >48:/home/gustavo/dev/pic/RiegoAutomatico/RiegoAutomatico.X/main.c
+77C maintext CODE >49:/home/gustavo/dev/pic/RiegoAutomatico/RiegoAutomatico.X/main.c
+77D maintext CODE >50:/home/gustavo/dev/pic/RiegoAutomatico/RiegoAutomatico.X/main.c
+77E maintext CODE >51:/home/gustavo/dev/pic/RiegoAutomatico/RiegoAutomatico.X/main.c
+77F maintext CODE >52:/home/gustavo/dev/pic/RiegoAutomatico/RiegoAutomatico.X/main.c
+780 maintext CODE >53:/home/gustavo/dev/pic/RiegoAutomatico/RiegoAutomatico.X/main.c
+781 maintext CODE >54:/home/gustavo/dev/pic/RiegoAutomatico/RiegoAutomatico.X/main.c
+782 maintext CODE >55:/home/gustavo/dev/pic/RiegoAutomatico/RiegoAutomatico.X/main.c
+783 maintext CODE >57:/home/gustavo/dev/pic/RiegoAutomatico/RiegoAutomatico.X/main.c
+786 maintext CODE >61:/home/gustavo/dev/pic/RiegoAutomatico/RiegoAutomatico.X/main.c
+789 maintext CODE >62:/home/gustavo/dev/pic/RiegoAutomatico/RiegoAutomatico.X/main.c
+796 maintext CODE >64:/home/gustavo/dev/pic/RiegoAutomatico/RiegoAutomatico.X/main.c
+799 maintext CODE >65:/home/gustavo/dev/pic/RiegoAutomatico/RiegoAutomatico.X/main.c
+79A maintext CODE >66:/home/gustavo/dev/pic/RiegoAutomatico/RiegoAutomatico.X/main.c
+7A7 maintext CODE >67:/home/gustavo/dev/pic/RiegoAutomatico/RiegoAutomatico.X/main.c
+7AA maintext CODE >68:/home/gustavo/dev/pic/RiegoAutomatico/RiegoAutomatico.X/main.c
+7AB maintext CODE >71:/home/gustavo/dev/pic/RiegoAutomatico/RiegoAutomatico.X/main.c
+7B8 maintext CODE >74:/home/gustavo/dev/pic/RiegoAutomatico/RiegoAutomatico.X/main.c
+7BB maintext CODE >75:/home/gustavo/dev/pic/RiegoAutomatico/RiegoAutomatico.X/main.c
+7BC maintext CODE >76:/home/gustavo/dev/pic/RiegoAutomatico/RiegoAutomatico.X/main.c
+7C9 maintext CODE >77:/home/gustavo/dev/pic/RiegoAutomatico/RiegoAutomatico.X/main.c
+7CC maintext CODE >78:/home/gustavo/dev/pic/RiegoAutomatico/RiegoAutomatico.X/main.c
+7CD maintext CODE >81:/home/gustavo/dev/pic/RiegoAutomatico/RiegoAutomatico.X/main.c
+7DA maintext CODE >84:/home/gustavo/dev/pic/RiegoAutomatico/RiegoAutomatico.X/main.c
+7DD maintext CODE >85:/home/gustavo/dev/pic/RiegoAutomatico/RiegoAutomatico.X/main.c
+7DE maintext CODE >86:/home/gustavo/dev/pic/RiegoAutomatico/RiegoAutomatico.X/main.c
+7EB maintext CODE >87:/home/gustavo/dev/pic/RiegoAutomatico/RiegoAutomatico.X/main.c
+7EE maintext CODE >88:/home/gustavo/dev/pic/RiegoAutomatico/RiegoAutomatico.X/main.c
+7EF maintext CODE >90:/home/gustavo/dev/pic/RiegoAutomatico/RiegoAutomatico.X/main.c
+7F0 maintext CODE >93:/home/gustavo/dev/pic/RiegoAutomatico/RiegoAutomatico.X/main.c
 # %SYMTAB Section
 # An enumeration of all symbols in the program.
 # The beginning of the section is indicated by %SYMTAB.
@@ -90,27 +118,28 @@ __Hspace_3 0 0 ABS 0 - -
 __Hspace_4 400F 0 ABS 0 - -
 __Heeprom_data 0 0 EEDATA 3 eeprom_data -
 __Hstrings 0 0 ABS 0 strings -
-___sp 0 0 STACK 2 stack /tmp/xcXOlfLhB.o
-_main FAE 0 CODE 0 maintext dist/default/production/RiegoAutomatico.X.production.o
+___sp 0 0 STACK 2 stack /tmp/xcXHpmfOB.o
+_main EEA 0 CODE 0 maintext dist/default/production/RiegoAutomatico.X.production.o
 btemp 7E 0 ABS 0 - dist/default/production/RiegoAutomatico.X.production.o
-start 0 0 CODE 0 init /tmp/xcXOlfLhB.o
+start 0 0 CODE 0 init /tmp/xcXHpmfOB.o
 __size_of_main 0 0 ABS 0 - dist/default/production/RiegoAutomatico.X.production.o
 __Hpowerup 0 0 CODE 0 powerup -
-intlevel0 0 0 ENTRY 0 functab /tmp/xcXOlfLhB.o
-intlevel1 0 0 ENTRY 0 functab /tmp/xcXOlfLhB.o
-intlevel2 0 0 ENTRY 0 functab /tmp/xcXOlfLhB.o
-intlevel3 0 0 ENTRY 0 functab /tmp/xcXOlfLhB.o
-intlevel4 0 0 ENTRY 0 functab /tmp/xcXOlfLhB.o
-intlevel5 0 0 ENTRY 0 functab /tmp/xcXOlfLhB.o
+intlevel0 0 0 ENTRY 0 functab /tmp/xcXHpmfOB.o
+intlevel1 0 0 ENTRY 0 functab /tmp/xcXHpmfOB.o
+intlevel2 0 0 ENTRY 0 functab /tmp/xcXHpmfOB.o
+intlevel3 0 0 ENTRY 0 functab /tmp/xcXHpmfOB.o
+intlevel4 0 0 ENTRY 0 functab /tmp/xcXHpmfOB.o
+intlevel5 0 0 ENTRY 0 functab /tmp/xcXHpmfOB.o
+_OSCCONbits 8F 0 ABS 0 - dist/default/production/RiegoAutomatico.X.production.o
 wtemp0 7E 0 ABS 0 - dist/default/production/RiegoAutomatico.X.production.o
 __Hfunctab 0 0 ENTRY 0 functab -
 __Hclrtext 0 0 ABS 0 clrtext -
 __Lmaintext 0 0 ABS 0 maintext -
-___stackhi 0 0 ABS 0 - /tmp/xcXOlfLhB.o
-___stacklo 0 0 ABS 0 - /tmp/xcXOlfLhB.o
+___stackhi 0 0 ABS 0 - /tmp/xcXHpmfOB.o
+___stacklo 0 0 ABS 0 - /tmp/xcXHpmfOB.o
 start_initialization FFC 0 CODE 0 cinit dist/default/production/RiegoAutomatico.X.production.o
-_OSCCON 8F 0 ABS 0 - dist/default/production/RiegoAutomatico.X.production.o
-___int_sp 0 0 STACK 2 stack /tmp/xcXOlfLhB.o
+_TRISBbits 86 0 ABS 0 - dist/default/production/RiegoAutomatico.X.production.o
+___int_sp 0 0 STACK 2 stack /tmp/xcXHpmfOB.o
 __Hbank0 0 0 ABS 0 bank0 -
 __Hbank1 0 0 ABS 0 bank1 -
 __Hbank2 0 0 ABS 0 bank2 -
@@ -149,8 +178,8 @@ __S1 73 0 ABS 0 - -
 __S2 0 0 ABS 0 - -
 __S3 0 0 ABS 0 - -
 __Lintentry 0 0 CODE 0 intentry -
-reset_vec 0 0 CODE 0 reset_vec /tmp/xcXOlfLhB.o
-__pmaintext FAE 0 CODE 0 maintext dist/default/production/RiegoAutomatico.X.production.o
+reset_vec 0 0 CODE 0 reset_vec /tmp/xcXHpmfOB.o
+__pmaintext EEA 0 CODE 0 maintext dist/default/production/RiegoAutomatico.X.production.o
 __Lcommon 0 0 ABS 0 common -
 __Lconfig 0 0 CONFIG 4 config -
 __Lspace_0 0 0 ABS 0 - -
@@ -173,7 +202,7 @@ __Lclrtext 0 0 ABS 0 clrtext -
 __pcstackCOMMON 70 0 COMMON 1 cstackCOMMON dist/default/production/RiegoAutomatico.X.production.o
 __Hend_init 2 0 CODE 0 end_init -
 __end_of_main FFC 0 CODE 0 maintext dist/default/production/RiegoAutomatico.X.production.o
-_TRISB 86 0 ABS 0 - dist/default/production/RiegoAutomatico.X.production.o
+_PORTB 6 0 ABS 0 - dist/default/production/RiegoAutomatico.X.production.o
 __Hram 0 0 ABS 0 ram -
 __Lram 0 0 ABS 0 ram -
 __initialization FFC 0 CODE 0 cinit dist/default/production/RiegoAutomatico.X.production.o
@@ -203,7 +232,7 @@ __initialization FFC 0 CODE 0 cinit dist/default/production/RiegoAutomatico.X.pr
 # All other numeric quantities are in decimal.
 %SEGMENTS
 cinit 0 7FE FFC 2 2
-maintext 0 7D7 FAE 27 2
+maintext 0 775 EEA 89 2
 cstackCOMMON 1 70 70 3 1
 reset_vec 0 0 0 1 2
 # %NOTES Section

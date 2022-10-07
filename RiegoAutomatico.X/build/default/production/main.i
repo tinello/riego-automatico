@@ -13,7 +13,7 @@
 #pragma config PWRTE = OFF
 #pragma config MCLRE = OFF
 #pragma config BOREN = OFF
-#pragma config LVP = ON
+#pragma config LVP = OFF
 #pragma config CPD = OFF
 #pragma config WRT = OFF
 #pragma config CCPMX = RB2
@@ -1328,16 +1328,64 @@ extern __bank0 __bit __timeout;
 
 
 void main(void){
-  TRISB = 0;
-  OSCCON = 0x76;
 
 
-  while(1)
-  {
-    PORTBbits.RB0 = 1;
-    _delay((unsigned long)((1000)*(8000000/4000.0)));
-    PORTBbits.RB0 = 0;
-    _delay((unsigned long)((1000)*(8000000/4000.0)));
-  }
-  return;
+
+    OSCCONbits.IRCF2 = 1;
+    OSCCONbits.IRCF1 = 1;
+    OSCCONbits.IRCF0 = 1;
+
+
+    OSCCONbits.IOFS = 1;
+
+
+
+    TRISBbits.TRISB0 = 0;
+    TRISBbits.TRISB1 = 0;
+    TRISBbits.TRISB2 = 0;
+    TRISBbits.TRISB3 = 0;
+    TRISBbits.TRISB4 = 0;
+    TRISBbits.TRISB5 = 0;
+    TRISBbits.TRISB6 = 0;
+    TRISBbits.TRISB7 = 0;
+
+    PORTB = 0x00;
+
+
+    while(1) {
+        PORTBbits.RB4 = 1;
+        _delay((unsigned long)((1000)*(8000000/4000.0)));
+
+        PORTBbits.RB0 = 1;
+        PORTBbits.RB5 = 1;
+        _delay((unsigned long)((5000)*(8000000/4000.0)));
+        PORTBbits.RB5 = 0;
+        PORTBbits.RB0 = 0;
+
+
+        _delay((unsigned long)((5000)*(8000000/4000.0)));
+
+
+        PORTBbits.RB1 = 1;
+        PORTBbits.RB5 = 1;
+        _delay((unsigned long)((5000)*(8000000/4000.0)));
+        PORTBbits.RB5 = 0;
+        PORTBbits.RB1 = 0;
+
+
+        _delay((unsigned long)((5000)*(8000000/4000.0)));
+
+
+        PORTBbits.RB2 = 1;
+        PORTBbits.RB5 = 1;
+        _delay((unsigned long)((5000)*(8000000/4000.0)));
+        PORTBbits.RB5 = 0;
+        PORTBbits.RB2 = 0;
+
+        PORTBbits.RB4 = 0;
+
+
+        _delay((unsigned long)((10000)*(8000000/4000.0)));
+    }
+    return;
 }
