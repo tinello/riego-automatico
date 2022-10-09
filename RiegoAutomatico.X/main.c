@@ -28,6 +28,7 @@
 // Use project enums instead of #define for ON and OFF.
 
 #include <xc.h>
+#include <pic16f819.h>
 
 //Indico al compilador la frecuencia
 #define _XTAL_FREQ 8000000
