@@ -36,7 +36,7 @@ void configuration(void);
 void bypassToGarden(void);
 void bypassToTank(void);
 void irrigationDelay(void);
-void loadTankDelay(void);
+//void loadTankDelay(void);
 void irrigationZone1(void);
 void irrigationZone2(void);
 void irrigationZone3(void);
@@ -61,15 +61,16 @@ void main(void) {
     
     PORTB = 0x00;
   
-    while(1) {        
+    while(1) {
         if (PORTAbits.RA1 == 0) {
-            __delay_ms(100);            
+            // Espero 0.1 segundos par confirmar que se pulso y no es ruido
+            __delay_ms(100);
             if (PORTAbits.RA1 == 0) {
                 bypassToGarden();
                 irrigationZone1();
-                loadTankDelay();
+                //loadTankDelay();
                 irrigationZone2();
-                loadTankDelay();
+                //loadTankDelay();
                 irrigationZone3();
                 bypassToTank();
             }
@@ -113,20 +114,23 @@ void configuration(void) {
 
 void bypassToGarden(void) {
     setBypass(1);  // Activo bypass riego
-    __delay_ms(1000); // Delay bypass finish
+    __delay_ms(20000); // Delay bypass finish
 }
 
 void bypassToTank(void) {
     setBypass(0);  // Desactivo bypass riego
 }
 
+
 void irrigationDelay(void) {
-    __delay_ms(5000); // Riego
+    __delay_ms(20000); // Riego
 }
 
+/*
 void loadTankDelay(void) {
     __delay_ms(5000); // Espera aque se llene el cisterna
 }
+*/
 
 void setOnSolenoide1(void) {
     setSolenoide1(1);
@@ -183,6 +187,8 @@ void irrigationZone1(void) {
     setOnSolenoide1();
     setPumpOn();
     irrigationDelay();
+    irrigationDelay();
+    irrigationDelay();
     setPumpOff();
     setOffSolenoide1();
 }
@@ -191,6 +197,8 @@ void irrigationZone2(void) {
     setOnSolenoide2();
     setPumpOn();
     irrigationDelay();
+    irrigationDelay();
+    irrigationDelay();
     setPumpOff();
     setOffSolenoide2();
 }
@@ -198,6 +206,8 @@ void irrigationZone2(void) {
 void irrigationZone3(void) {
     setOnSolenoide3();
     setPumpOn();
+    irrigationDelay();
+    irrigationDelay();
     irrigationDelay();
     setPumpOff();
     setOffSolenoide3();
