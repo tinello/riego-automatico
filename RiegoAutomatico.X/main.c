@@ -15,7 +15,7 @@
 // CONFIG
 #pragma config FOSC = INTOSCIO  // Oscillator Selection bits (INTRC oscillator; port I/O function on both RA6/OSC2/CLKO pin and RA7/OSC1/CLKI pin)
 #pragma config WDTE = OFF       // Watchdog Timer Enable bit (WDT disabled)
-#pragma config PWRTE = OFF      // Power-up Timer Enable bit (PWRT disabled)
+#pragma config PWRTE = ON      // Power-up Timer Enable bit (PWRT disabled)
 #pragma config MCLRE = OFF      // RA5/MCLR/VPP Pin Function Select bit (RA5/MCLR/VPP pin function is digital I/O, MCLR internally tied to VDD)
 #pragma config BOREN = OFF      // Brown-out Reset Enable bit (BOR disabled)
 #pragma config LVP = OFF        // Low-Voltage Programming Enable bit (RB3/PGM pin has digital I/O function, HV on MCLR must be used for programming)
@@ -33,13 +33,26 @@
 #define _XTAL_FREQ 8000000
 
 void configuration(void);
-void bypassToGarden();
-void bypassToTank();
-void irrigationDelay();
-void loadTankDelay();
-void irrigationZone1();
-void irrigationZone2();
-void irrigationZone3();
+void bypassToGarden(void);
+void bypassToTank(void);
+void irrigationDelay(void);
+void loadTankDelay(void);
+void irrigationZone1(void);
+void irrigationZone2(void);
+void irrigationZone3(void);
+void setSolenoide1(unsigned char);
+void setSolenoide2(unsigned char);
+void setSolenoide3(unsigned char);
+void setOnSolenoide1(void);
+void setOffSolenoide1(void);
+void setOnSolenoide2(void);
+void setOffSolenoide2(void);
+void setOnSolenoide3(void);
+void setOffSolenoide3(void);
+void setBypass(unsigned char);
+void setPump(unsigned char);
+void setPumpOn(void);
+void setPumpOff(void);
 
 
 void main(void) {
@@ -48,13 +61,10 @@ void main(void) {
     
     PORTB = 0x00;
   
-    while(1) {
-        
-        if (PORTAbits.RA0 == 0) {
-            
-            __delay_ms(100);
-            
-            if (PORTAbits.RA0 == 0) {
+    while(1) {        
+        if (PORTAbits.RA1 == 0) {
+            __delay_ms(100);            
+            if (PORTAbits.RA1 == 0) {
                 bypassToGarden();
                 irrigationZone1();
                 loadTankDelay();
@@ -64,10 +74,6 @@ void main(void) {
                 bypassToTank();
             }
         }
-        
-        
-        
-        //__delay_ms(10000); // Espera aque se llene el cisterna
     }
     return;
 }
@@ -105,43 +111,94 @@ void configuration(void) {
     TRISAbits.TRISA7 = 1; //Input
 }
 
-void bypassToGarden() {
-    PORTBbits.RB4 = 1;  // Activo bypass riego
+void bypassToGarden(void) {
+    setBypass(1);  // Activo bypass riego
     __delay_ms(1000); // Delay bypass finish
 }
 
-void bypassToTank() {
-    PORTBbits.RB4 = 0;  // Desactivo bypass riego
+void bypassToTank(void) {
+    setBypass(0);  // Desactivo bypass riego
 }
 
-void irrigationDelay() {
+void irrigationDelay(void) {
     __delay_ms(5000); // Riego
 }
 
-void loadTankDelay() {
+void loadTankDelay(void) {
     __delay_ms(5000); // Espera aque se llene el cisterna
 }
 
-void irrigationZone1() {
-    PORTBbits.RB0 = 1;  // Solenoide 1 ON
-    PORTBbits.RB5 = 1;  // Bomba ON
-    irrigationDelay();
-    PORTBbits.RB5 = 0;  // Bomba OFF
-    PORTBbits.RB0 = 0;  // Solenoide 1 OFF
+void setOnSolenoide1(void) {
+    setSolenoide1(1);
 }
 
-void irrigationZone2() {
-    PORTBbits.RB1 = 1;  // Solenoide 2 ON
-    PORTBbits.RB5 = 1;  // Bomba ON
-    irrigationDelay();
-    PORTBbits.RB5 = 0;  // Bomba OFF
-    PORTBbits.RB1 = 0;  // Solenoide 2 OFF
+void setOffSolenoide1(void) {
+    setSolenoide1(0);
 }
 
-void irrigationZone3() {
-    PORTBbits.RB2 = 1;  // Solenoide 3 ON
-    PORTBbits.RB5 = 1;  // Bomba ON
+void setSolenoide1(unsigned char state) {
+    PORTBbits.RB2 = state;
+}
+
+void setOnSolenoide2(void) {
+    setSolenoide2(1);
+}
+
+void setOffSolenoide2(void) {
+    setSolenoide2(0);
+}
+
+void setSolenoide2(unsigned char state) {
+    PORTBbits.RB3 = state;
+}
+
+void setOnSolenoide3(void) {
+    setSolenoide3(1);
+}
+
+void setOffSolenoide3(void) {
+    setSolenoide3(0);
+}
+void setSolenoide3(unsigned char state) {
+    PORTBbits.RB4 = state;
+}
+
+void setBypass(unsigned char state) {
+    PORTBbits.RB0 = state;
+}
+
+void setPump(unsigned char state) {
+    PORTBbits.RB1 = state;
+}
+
+void setPumpOn(void) {
+    setPump(1); // Bomba ON
+}
+
+void setPumpOff(void) {
+    setPump(0); // Bomba OFF
+}
+
+void irrigationZone1(void) {
+    setOnSolenoide1();
+    setPumpOn();
     irrigationDelay();
-    PORTBbits.RB5 = 0;  // Bomba OFF
-    PORTBbits.RB2 = 0;  // Solenoide 3 OFF
+    setPumpOff();
+    setOffSolenoide1();
+}
+
+void irrigationZone2(void) {
+    setOnSolenoide2();
+    setPumpOn();
+    irrigationDelay();
+    setPumpOff();
+    setOffSolenoide2();
+}
+
+void irrigationZone3(void) {
+    setOnSolenoide3();
+    setPumpOn();
+    irrigationDelay();
+    setPumpOff();
+    setOffSolenoide3();
 }
