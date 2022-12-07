@@ -37,3 +37,5 @@ RiegoAutomatico.X/.generated_files/
 
 # End of https://www.toptal.com/developers/gitignore/api/mplabx
 
+/PIC16F819ASM/build/
+/PIC16F819ASM/dist/
