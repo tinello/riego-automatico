@@ -106,9 +106,12 @@ conf_internal_clock_8mhz:
 	
 	
 loop:
-	call	regar
-	
-	call	retardo
+	btfsc	PORTA_REG, 0x01
+	goto	loop
+	call	retardo_1_decima
+	btfsc	PORTA_REG, 0x01
+	goto	loop
+	call	regar	
 	goto	loop
 	
 
@@ -137,6 +140,9 @@ regar:
 	movlw	0x00
         movwf	PORTB_REG
 	
+	retlw	0x00
+	
+	
 retardo:
 	bank0
 	movlw	0x2A
@@ -157,6 +163,21 @@ uno:
 	
 	decfsz	retardo3
 	goto	tres
+	
+	retlw	0x00
+	
+retardo_1_decima:
+	movlw	0x84
+	movwf	retardo2
+retardo_1_decima_dos:
+	movlw	0xFA
+	movwf	retardo1
+retardo_1_decima_uno:
+	decfsz	retardo1
+	goto	retardo_1_decima_uno
+	
+	decfsz	retardo2
+	goto	retardo_1_decima_dos
 	
 	retlw	0x00
 END
