@@ -38,6 +38,7 @@ status_RP0	EQU	0x05
 retardo1	EQU	0x20
 retardo2	EQU	0x21
 retardo3	EQU	0x22
+retardo4	EQU	0x23
 	
 	
 
@@ -77,15 +78,15 @@ bank3	    MACRO
 PSECT	code, delta=2, abs
 ORG	0x0000
 resetVector:
-	goto	main
+	goto	setup
 
 	
 PSECT	code, delta=2, abs
 ORG	0x000A
-main:
+setup:
 conf_internal_clock_8mhz:
 	bank1
-	movlw	0x64
+	movlw	0x74
         movwf	OSCCON_REG
 	
 	movlw	0xFF
@@ -105,36 +106,36 @@ conf_internal_clock_8mhz:
         movwf	PORTB_REG
 	
 	
-loop:
+main:
 	btfsc	PORTA_REG, 0x01
-	goto	loop
-	call	retardo_1_decima
+	goto	main
+	call	sleep_1_tenth
 	btfsc	PORTA_REG, 0x01
-	goto	loop
-	call	regar	
-	goto	loop
+	goto	main
+	call	watering	
+	goto	main
 	
 
-regar:
+watering:
 	bank0
 	//Encender bypass
 	bsf	PORTB_REG, 0x00
-	call	retardo
+	call	sleep_20_seconds
 	
 	//Encender solenoide 1 y bomba
 	bsf	PORTB_REG, 0x02
 	bsf	PORTB_REG, 0x01
-	call	retardo
+	call	sleep_60_seconds
 	
 	//Encender solenoide 2 y apagar la 1
 	bsf	PORTB_REG, 0x03
 	bcf	PORTB_REG, 0x02
-	call	retardo
+	call	sleep_60_seconds
 	
 	//Encender solenoide 3 y apagar la 2
 	bsf	PORTB_REG, 0x04
 	bcf	PORTB_REG, 0x03
-	call	retardo
+	call	sleep_60_seconds
 	
 	//apago todo
 	movlw	0x00
@@ -143,41 +144,68 @@ regar:
 	retlw	0x00
 	
 	
-retardo:
+	
+sleep_20_seconds:
+	movlw	0x14
+	movwf	retardo4
+sleep_20_seconds_one:
+	decfsz	retardo4
+	goto	sleep_20_seconds_two
+	retlw	0x00
+sleep_20_seconds_two:	
+	call	sleep_1_second
+	goto	sleep_20_seconds_one
+	
+	
+	
+sleep_60_seconds:
+	movlw	0x37
+	movwf	retardo4
+sleep_60_seconds_one:
+	decfsz	retardo4
+	goto	sleep_60_seconds_two
+	retlw	0x00
+sleep_60_seconds_two:	
+	call	sleep_1_second
+	goto	sleep_60_seconds_one
+	
+	
+	
+sleep_1_second:
 	bank0
-	movlw	0x2A
+	movlw	0x0C	    ;0x2A
 	movwf	retardo3
 
-tres:
+sleep_1_second_three:
 	movlw	0xFC
 	movwf	retardo2
-dos:
+sleep_1_second_two:
 	movlw	0xFA
 	movwf	retardo1
-uno:
+sleep_1_second_one:
 	decfsz	retardo1
-	goto	uno
+	goto	sleep_1_second_one
 	
 	decfsz	retardo2
-	goto	dos
+	goto	sleep_1_second_two
 	
 	decfsz	retardo3
-	goto	tres
+	goto	sleep_1_second_three
 	
 	retlw	0x00
 	
-retardo_1_decima:
+sleep_1_tenth:
 	movlw	0x84
 	movwf	retardo2
-retardo_1_decima_dos:
+sleep_1_tenth_two:
 	movlw	0xFA
 	movwf	retardo1
-retardo_1_decima_uno:
+sleep_1_tenth_one:
 	decfsz	retardo1
-	goto	retardo_1_decima_uno
+	goto	sleep_1_tenth_one
 	
 	decfsz	retardo2
-	goto	retardo_1_decima_dos
+	goto	sleep_1_tenth_two
 	
 	retlw	0x00
 END
