@@ -39,3 +39,5 @@ RiegoAutomatico.X/.generated_files/
 
 /PIC16F819ASM/build/
 /PIC16F819ASM/dist/
+/PIC16F819ASM/defmplabxtrace.*
+

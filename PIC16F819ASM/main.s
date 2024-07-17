@@ -107,12 +107,12 @@ conf_internal_clock_8mhz:
 	
 	
 main:
-	btfsc	PORTA_REG, 0x01
+	btfsc	PORTA_REG, 0x01	    // Pulsador precionado?
 	goto	main
-	call	sleep_1_tenth
-	btfsc	PORTA_REG, 0x01
+	call	sleep_1_tenth	    // Pulsador precionado, llamo a demora.
+	btfsc	PORTA_REG, 0x01	    // Confirmo pulsador precionado?
 	goto	main
-	call	watering	
+	call	watering	    // Llamo a rutina de riego
 	goto	main
 	
 
