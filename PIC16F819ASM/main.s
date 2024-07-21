@@ -18,27 +18,49 @@ CONFIG  CP = OFF              ; Flash Program Memory Code Protection bit (Code p
 
 ;Constantes
 ;Registros banco 0
-STATUS_REG	EQU	0x03
-ADCON0_REG	EQU	0x1F
-PORTA_REG	EQU	0x05
-PORTB_REG	EQU	0x06
+STATUS_REG		EQU 0x03
+ADCON0_REG		EQU 0x1F
+PORTA_REG		EQU 0x05
+PORTB_REG		EQU 0x06
 	
 ;Registros banco 1
-OSCCON_REG	EQU	0x8F
-TRISA_REG	EQU	0x85
-TRISB_REG	EQU	0x86
-ADCON1_REG	EQU	0x9F
+OSCCON_REG		EQU 0x8F
+TRISA_REG		EQU 0x85
+TRISB_REG		EQU 0x86
+ADCON1_REG		EQU 0x9F
 
 ;STATUS Bits
-status_IRP	EQU	0x07
-status_RP1	EQU	0x06
-status_RP0	EQU	0x05
+status_IRP		EQU 0x07
+status_RP1		EQU 0x06
+status_RP0		EQU 0x05
 
-	    
-retardo1	EQU	0x20
-retardo2	EQU	0x21
-retardo3	EQU	0x22
-retardo4	EQU	0x23
+;PORTA Bits
+PORTA_RA0		EQU 0x00
+PORTA_RA1_START		EQU 0x01
+PORTA_RA2		EQU 0x02
+PORTA_RA3		EQU 0x03
+PORTA_RA4		EQU 0x04
+PORTA_RA5		EQU 0x05
+PORTA_RA6		EQU 0x06
+PORTA_RA7		EQU 0x07
+
+;PORTB Bits
+PORTB_RB0_SOLENOIDE	EQU 0x00
+PORTB_RB1_PUMP		EQU 0x01
+PORTB_RB2		EQU 0x02
+PORTB_RB3		EQU 0x03
+PORTB_RB4		EQU 0x04
+PORTB_RB5		EQU 0x05
+PORTB_RB6		EQU 0x06
+PORTB_RB7		EQU 0x07
+
+
+;Variables
+retardo1		EQU 0x20
+retardo2		EQU 0x21
+retardo3		EQU 0x22
+retardo4		EQU 0x23
+watering_loops		EQU 0x24
 	
 	
 
@@ -70,8 +92,6 @@ bank3	    MACRO
 	    bsf		STATUS, status_RP0
 	    ENDM
 ;-------------------------------------------
-
-
 	
 	
 	
@@ -107,44 +127,59 @@ conf_internal_clock_8mhz:
 	
 	
 main:
-	btfsc	PORTA_REG, 0x01	    // Pulsador precionado?
+	// Pulsador precionado?
+	btfsc	PORTA_REG, PORTA_RA1_START
 	goto	main
-	call	sleep_1_tenth	    // Pulsador precionado, llamo a demora.
-	btfsc	PORTA_REG, 0x01	    // Confirmo pulsador precionado?
+	// Pulsador precionado, llamo a demora.
+	call	sleep_1_tenth
+	// Confirmo pulsador precionado?
+	btfsc	PORTA_REG, PORTA_RA1_START
 	goto	main
-	call	watering	    // Llamo a rutina de riego
+	// Llamo a rutina de riego
+	call	watering
 	goto	main
 	
 
 watering:
 	bank0
-	//Encender bypass
-	bsf	PORTB_REG, 0x00
-	call	sleep_20_seconds
+	//Encender Solenoide
+	bsf	PORTB_REG, PORTB_RB0_SOLENOIDE
 	
-	//Encender solenoide 1 y bomba
-	bsf	PORTB_REG, 0x02
-	bsf	PORTB_REG, 0x01
-	call	sleep_60_seconds
+	//Sleep 4seg
+	call	sleep_1_second
+	call	sleep_1_second
+	call	sleep_1_second
+	call	sleep_1_second
 	
-	//Encender solenoide 2 y apagar la 1
-	bsf	PORTB_REG, 0x03
-	bcf	PORTB_REG, 0x02
-	call	sleep_60_seconds
+	//Encender bomba
+	bsf	PORTB_REG, PORTB_RB1_PUMP
 	
-	//Encender solenoide 3 y apagar la 2
-	bsf	PORTB_REG, 0x04
-	bcf	PORTB_REG, 0x03
-	call	sleep_60_seconds
+	//Loop for 5 times 1 minute sleep
+	movlw	0x05
+	movwf	watering_loops
+
+watering_loop:
+	call	sleep_60_seconds		
+	decfsz	watering_loops
+	call	watering_loop
 	
-	//apago todo
-	movlw	0x00
-        movwf	PORTB_REG
+pump_power_off:
+	//Apagar bomba
+	bcf	PORTB_REG, PORTB_RB1_PUMP
+	
+	//Sleep 4seg
+	call	sleep_1_second
+	call	sleep_1_second
+	call	sleep_1_second
+	call	sleep_1_second
+	
+	//Apagar Solenoide
+	bcf	PORTB_REG, PORTB_RB0_SOLENOIDE
 	
 	retlw	0x00
 	
 	
-	
+/*
 sleep_20_seconds:
 	movlw	0x14
 	movwf	retardo4
@@ -155,7 +190,7 @@ sleep_20_seconds_one:
 sleep_20_seconds_two:	
 	call	sleep_1_second
 	goto	sleep_20_seconds_one
-	
+*/
 	
 	
 sleep_60_seconds:
