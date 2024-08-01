@@ -28,31 +28,55 @@
 // Use project enums instead of #define for ON and OFF.
 
 #include <xc.h>
+#include "KeyEvent.h"
 
 //Indico al compilador la frecuencia
 #define _XTAL_FREQ 8000000
 
+#define FLAGS FLAGS
+extern volatile unsigned char FLAGS __at(0x21);
+typedef union {
+    struct {
+        unsigned EnableStart            :1;
+        unsigned a                   :1;
+        unsigned b                 :1;
+        unsigned c                   :1;
+        unsigned d                   :1;
+        unsigned e                   :1;
+        unsigned f                   :1;
+        unsigned g                    :1;
+    };
+} FLAGSBits_t;
+extern volatile FLAGSBits_t FLAGSBits __at(0x21);
+
+
+extern regData keyStart __at(0x020);
+//extern BitFlags bitFlags __at(0x21);
+
+
 void configuration(void);
-void bypassToGarden(void);
-void bypassToTank(void);
-void irrigationDelay(void);
-//void loadTankDelay(void);
-void irrigationZone1(void);
-void irrigationZone2(void);
-void irrigationZone3(void);
-void setSolenoide1(unsigned char);
-void setSolenoide2(unsigned char);
-void setSolenoide3(unsigned char);
-void setOnSolenoide1(void);
-void setOffSolenoide1(void);
-void setOnSolenoide2(void);
-void setOffSolenoide2(void);
-void setOnSolenoide3(void);
-void setOffSolenoide3(void);
-void setBypass(unsigned char);
-void setPump(unsigned char);
-void setPumpOn(void);
-void setPumpOff(void);
+void configuration_oscillator(void);
+void configuration_ports(void);
+void configuration_timers(void);
+
+
+void keyStartDown(void);
+void keyStartUp(void);
+
+
+void __interrupt() tcInt(void) {
+    
+    // Valido que la interrucion sea por TMR0
+    if (INTCONbits.TMR0IF == 1) {
+        if (FLAGSBits.EnableStart == 0) {
+            key_events(PORTAbits.RA0, &keyStart, &keyStartDown, &keyStartUp);
+        }
+        
+        TMR0 = 0;
+        INTCONbits.TMR0IF = 0;
+    }
+}
+
 
 
 void main(void) {
@@ -62,24 +86,17 @@ void main(void) {
     PORTB = 0x00;
   
     while(1) {
-        if (PORTAbits.RA1 == 0) {
-            // Espero 0.1 segundos par confirmar que se pulso y no es ruido
-            __delay_ms(100);
-            if (PORTAbits.RA1 == 0) {
-                bypassToGarden();
-                irrigationZone1();
-                //loadTankDelay();
-                irrigationZone2();
-                //loadTankDelay();
-                irrigationZone3();
-                bypassToTank();
-            }
-        }
     }
     return;
 }
 
 void configuration(void) {
+    configuration_oscillator();
+    configuration_ports();
+    configuration_timers();
+}
+
+void configuration_oscillator(void) {
     //Internal Oscillator Frequency Select 8MHz
     //OSCCON = 0x76;
     OSCCONbits.IRCF2 = 1;
@@ -88,21 +105,22 @@ void configuration(void) {
 
     //Frequency is stable
     OSCCONbits.IOFS = 1;
-    
-    
-    //TRISB = 0; //RB0 as Output PIN
-    TRISBbits.TRISB0 = 0; //Output solenoide 1
-    TRISBbits.TRISB1 = 0; //Output solenoide 2
-    TRISBbits.TRISB2 = 0; //Output solenoide 3
+}
+
+void configuration_ports(void){
+    //TRISB = 0;
+    TRISBbits.TRISB0 = 0; //Output
+    TRISBbits.TRISB1 = 0; //Output
+    TRISBbits.TRISB2 = 0; //Output
     TRISBbits.TRISB3 = 0; //Output
-    TRISBbits.TRISB4 = 0; //Output bypass tanque/riego
-    TRISBbits.TRISB5 = 0; //Output bomba de agua
+    TRISBbits.TRISB4 = 0; //Output
+    TRISBbits.TRISB5 = 0; //Output
     TRISBbits.TRISB6 = 0; //Output
     TRISBbits.TRISB7 = 0; //Output
     
     ADCON0 = 0x06;
     ADCON1 = 0x06;
-    TRISAbits.TRISA0 = 1; //Input Start Irrigation
+    TRISAbits.TRISA0 = 1; //Input
     TRISAbits.TRISA1 = 1; //Input
     TRISAbits.TRISA2 = 1; //Input
     TRISAbits.TRISA3 = 1; //Input
@@ -112,103 +130,29 @@ void configuration(void) {
     TRISAbits.TRISA7 = 1; //Input
 }
 
-void bypassToGarden(void) {
-    setBypass(1);  // Activo bypass riego
-    __delay_ms(20000); // Delay bypass finish
+void configuration_timers(void){
+    // Configuro Timer0 Prescaler 1:256
+    OPTION_REGbits.PS0 = 1;
+    OPTION_REGbits.PS1 = 1;
+    OPTION_REGbits.PS2 = 1;
+    
+    OPTION_REGbits.PSA = 0; //Prescaler is assigned to the Timer0 module
+    
+    // TMR0 Clock Source Select: Internal instruction cycl
+    OPTION_REGbits.T0CS = 0;
+    
+    INTCONbits.GIE = 1; // Enable global interrupt
+    INTCONbits.TMR0IE = 1; // Enable TMR0 Overflow Interrupt
+    INTCONbits.TMR0IF = 0; // Clear flag TMR0 Overflow Interrupt
+    
+    TMR0 = 0; // Clear counter
 }
 
-void bypassToTank(void) {
-    setBypass(0);  // Desactivo bypass riego
-}
 
 
-void irrigationDelay(void) {
-    __delay_ms(20000); // Riego
+void keyStartDown(void){
+    
 }
-
-/*
-void loadTankDelay(void) {
-    __delay_ms(5000); // Espera aque se llene el cisterna
-}
-*/
-
-void setOnSolenoide1(void) {
-    setSolenoide1(1);
-}
-
-void setOffSolenoide1(void) {
-    setSolenoide1(0);
-}
-
-void setSolenoide1(unsigned char state) {
-    PORTBbits.RB2 = state;
-}
-
-void setOnSolenoide2(void) {
-    setSolenoide2(1);
-}
-
-void setOffSolenoide2(void) {
-    setSolenoide2(0);
-}
-
-void setSolenoide2(unsigned char state) {
-    PORTBbits.RB3 = state;
-}
-
-void setOnSolenoide3(void) {
-    setSolenoide3(1);
-}
-
-void setOffSolenoide3(void) {
-    setSolenoide3(0);
-}
-void setSolenoide3(unsigned char state) {
-    PORTBbits.RB4 = state;
-}
-
-void setBypass(unsigned char state) {
-    PORTBbits.RB0 = state;
-}
-
-void setPump(unsigned char state) {
-    PORTBbits.RB1 = state;
-}
-
-void setPumpOn(void) {
-    setPump(1); // Bomba ON
-}
-
-void setPumpOff(void) {
-    setPump(0); // Bomba OFF
-}
-
-void irrigationZone1(void) {
-    setOnSolenoide1();
-    setPumpOn();
-    irrigationDelay();
-    irrigationDelay();
-    irrigationDelay();
-    setPumpOff();
-    setOffSolenoide1();
-}
-
-void irrigationZone2(void) {
-    setOnSolenoide2();
-    setPumpOn();
-    irrigationDelay();
-    irrigationDelay();
-    irrigationDelay();
-    setPumpOff();
-    setOffSolenoide2();
-}
-
-void irrigationZone3(void) {
-    setOnSolenoide3();
-    setPumpOn();
-    irrigationDelay();
-    irrigationDelay();
-    irrigationDelay();
-    setPumpOff();
-    setOffSolenoide3();
+void keyStartUp(void){
+    
 }

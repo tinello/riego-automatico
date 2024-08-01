@@ -41,3 +41,6 @@ RiegoAutomatico.X/.generated_files/
 /PIC16F819ASM/dist/
 /PIC16F819ASM/defmplabxtrace.*
 
+*.X/_build_mplab
+*.X/.generated-cmakefiles/
+*.X/out/
