@@ -33,47 +33,116 @@
 //Indico al compilador la frecuencia
 #define _XTAL_FREQ 8000000
 
-#define FLAGS FLAGS
-extern volatile unsigned char FLAGS __at(0x21);
-typedef union {
-    struct {
-        unsigned EnableStart            :1;
-        unsigned a                   :1;
-        unsigned b                 :1;
-        unsigned c                   :1;
-        unsigned d                   :1;
-        unsigned e                   :1;
-        unsigned f                   :1;
-        unsigned g                    :1;
-    };
-} FLAGSBits_t;
-extern volatile FLAGSBits_t FLAGSBits __at(0x21);
-
-
 extern regData keyStart __at(0x020);
-//extern BitFlags bitFlags __at(0x21);
+
+// TMR1 = 65536-((0,1×8000000)÷(4×8))
+// TMR1 = 40536
+
+// TMR1 = 65536-((0,05×8000000)÷(1×8))
+// TMR1 = 15536
+
+
+extern volatile unsigned char delay1 __at(0x22);
+extern volatile unsigned char delay2 __at(0x23);
+extern volatile unsigned char delay3 __at(0x24);
+extern volatile unsigned int irrigation __at(0x25);
 
 
 void configuration(void);
 void configuration_oscillator(void);
 void configuration_ports(void);
 void configuration_timers(void);
+void configuration_timer0(void);
+void configuration_timer1(void);
 
 
 void keyStartDown(void);
 void keyStartUp(void);
+
+/**
+ * 0x00 Waitting
+ * 0x01 Start Irrigation
+ * 0x02 Delay 1 end
+ * 0x03 On Solenoides
+ * 0x04 Delay 2 end
+ * 0x05 On Pump
+ * 0x06 Irrigation
+ * 0x07 Off Pump
+ * 0x08 Delay 3 end
+ * 0x09 Off Solenoide
+*/
+unsigned char irrigationSequence;
+
+const unsigned char irWaiting       = 0x00;
+const unsigned char irStart         = 0x01;
+const unsigned char irDelay1End     = 0x02;
+const unsigned char irOnSolenoide   = 0x03;
+const unsigned char irDelay2End     = 0x04;
+const unsigned char irOnPump        = 0x05;
+const unsigned char irIrrigation    = 0x06;
+const unsigned char irOffPump       = 0x07;
+const unsigned char irDelay3End     = 0x08;
+const unsigned char irOffSolenoide  = 0x09;
+
 
 
 void __interrupt() tcInt(void) {
     
     // Valido que la interrucion sea por TMR0
     if (INTCONbits.TMR0IF == 1) {
-        if (FLAGSBits.EnableStart == 0) {
+        if (irrigationSequence == irWaiting) { // Entr solo si no esta iniciada la secuencia de riego.
             key_events(PORTAbits.RA0, &keyStart, &keyStartDown, &keyStartUp);
         }
         
         TMR0 = 0;
         INTCONbits.TMR0IF = 0;
+    }
+    
+    // Valido que la interrucion sea por TMR1
+    if (PIR1bits.TMR1IF == 1) {
+        PIR1bits.TMR1IF = 0;
+        TMR1H = 0x3C; // Clear counter
+        TMR1L = 0xB0; // Clear counter
+        
+        if(irrigationSequence == irStart && delay1 > 0){
+            delay1--;
+            if(delay1 == 0){
+                irrigationSequence = irOnSolenoide;
+            }
+        } else if(irrigationSequence == irOnSolenoide){
+            PORTBbits.RB0 = 1;
+            delay2 = 0xC7;
+            irrigationSequence = irDelay2End;
+        } else if(delay2 > 0){
+            delay2--;
+            if(delay2 == 0){
+                irrigationSequence = irOnPump;
+            }
+        } else if(irrigationSequence == irOnPump){
+            PORTBbits.RB1 = 1;
+            //irrigation = 0x1770;
+            irrigation = 0xC7;
+            irrigationSequence = irIrrigation;
+        } else if(irrigation > 0){
+            irrigation--;
+            if(irrigation == 0){
+                irrigationSequence = irOffPump;
+            }
+        } else if(irrigationSequence == irOffPump){
+            PORTBbits.RB1 = 0;
+            irrigationSequence = irDelay3End;
+            delay3 = 0xC7;
+        } else if(delay3 > 0){
+            delay3--;
+            if(delay3 == 0){
+                irrigationSequence = irOffSolenoide;
+            }
+        } else if(irrigationSequence == irOffSolenoide){
+            PORTBbits.RB0 = 0;
+            irrigationSequence = irWaiting;
+        }
+        
+        
     }
 }
 
@@ -84,6 +153,11 @@ void main(void) {
     configuration();
     
     PORTB = 0x00;
+    irrigationSequence = 0x00;
+    delay1 = 0x00;
+    delay2 = 0x00;
+    delay3 = 0x00;
+    irrigation = 0x0000;
   
     while(1) {
     }
@@ -109,8 +183,8 @@ void configuration_oscillator(void) {
 
 void configuration_ports(void){
     //TRISB = 0;
-    TRISBbits.TRISB0 = 0; //Output
-    TRISBbits.TRISB1 = 0; //Output
+    TRISBbits.TRISB0 = 0; //Output Solenoide
+    TRISBbits.TRISB1 = 0; //Output Pump
     TRISBbits.TRISB2 = 0; //Output
     TRISBbits.TRISB3 = 0; //Output
     TRISBbits.TRISB4 = 0; //Output
@@ -120,7 +194,7 @@ void configuration_ports(void){
     
     ADCON0 = 0x06;
     ADCON1 = 0x06;
-    TRISAbits.TRISA0 = 1; //Input
+    TRISAbits.TRISA0 = 1; //Input Button
     TRISAbits.TRISA1 = 1; //Input
     TRISAbits.TRISA2 = 1; //Input
     TRISAbits.TRISA3 = 1; //Input
@@ -131,6 +205,12 @@ void configuration_ports(void){
 }
 
 void configuration_timers(void){
+    configuration_timer0();
+    configuration_timer1();
+    
+    INTCONbits.GIE = 1; // Enable global interrupt
+}
+void configuration_timer0(void){
     // Configuro Timer0 Prescaler 1:256
     OPTION_REGbits.PS0 = 1;
     OPTION_REGbits.PS1 = 1;
@@ -141,18 +221,38 @@ void configuration_timers(void){
     // TMR0 Clock Source Select: Internal instruction cycl
     OPTION_REGbits.T0CS = 0;
     
-    INTCONbits.GIE = 1; // Enable global interrupt
     INTCONbits.TMR0IE = 1; // Enable TMR0 Overflow Interrupt
     INTCONbits.TMR0IF = 0; // Clear flag TMR0 Overflow Interrupt
     
     TMR0 = 0; // Clear counter
 }
 
+void configuration_timer1(void){
+    // Config Timer1 prescala 1:8
+    T1CONbits.T1CKPS0 = 1;
+    T1CONbits.T1CKPS1 = 1;
+    T1CONbits.T1OSCEN = 1; // Oscillator is enabled
+    T1CONbits.T1INSYNC = 0;
+    T1CONbits.TMR1CS = 0; // Internal clock
+    T1CONbits.TMR1ON = 0; // Stops Timer1
+    
+    INTCONbits.PEIE = 1; // Enables all unmasked peripheral interrupts
+    
+    PIR1bits.TMR1IF = 0; // Clear flag
+    
+    TMR1H = 0x3C; // Clear counter
+    TMR1L = 0xB0; // Clear counter
+    
+    PIE1bits.TMR1IE = 1; // TMR1 overflow interrupt enable
+    
+    T1CONbits.TMR1ON = 1; // Start Timer1
+}
 
 
 void keyStartDown(void){
     
 }
 void keyStartUp(void){
-    
+    irrigationSequence = irStart;
+    delay1 = 0xC8;
 }
