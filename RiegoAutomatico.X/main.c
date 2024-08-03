@@ -36,10 +36,10 @@
 extern regData keyStart __at(0x020);
 
 // TMR1 = 65536-((0,1×8000000)÷(4×8))
-// TMR1 = 40536
-
-// TMR1 = 65536-((0,05×8000000)÷(1×8))
-// TMR1 = 15536
+// TMR1 = 40536;
+// TMR1 = 0x9E58;
+// TMR1H = 0x9E;
+// TMR1L = 0x58;
 
 
 extern volatile unsigned char delay1 __at(0x22);
@@ -84,6 +84,13 @@ const unsigned char irOffPump       = 0x07;
 const unsigned char irDelay3End     = 0x08;
 const unsigned char irOffSolenoide  = 0x09;
 
+const unsigned char TMR1H_  = 0x9E;
+const unsigned char TMR1L_  = 0x58;
+
+const unsigned char delay1_value  = 0x64;
+const unsigned char delay2_value  = 0x64;
+const unsigned char delay3_value  = 0x64;
+const unsigned int  irrigation_value  = 0x64;
 
 
 void __interrupt() tcInt(void) {
@@ -101,8 +108,8 @@ void __interrupt() tcInt(void) {
     // Valido que la interrucion sea por TMR1
     if (PIR1bits.TMR1IF == 1) {
         PIR1bits.TMR1IF = 0;
-        TMR1H = 0x3C; // Clear counter
-        TMR1L = 0xB0; // Clear counter
+        TMR1H = TMR1H_; // Clear counter
+        TMR1L = TMR1L_; // Clear counter
         
         if(irrigationSequence == irStart && delay1 > 0){
             delay1--;
@@ -111,7 +118,7 @@ void __interrupt() tcInt(void) {
             }
         } else if(irrigationSequence == irOnSolenoide){
             PORTBbits.RB0 = 1;
-            delay2 = 0xC7;
+            delay2 = delay2_value;
             irrigationSequence = irDelay2End;
         } else if(delay2 > 0){
             delay2--;
@@ -121,7 +128,7 @@ void __interrupt() tcInt(void) {
         } else if(irrigationSequence == irOnPump){
             PORTBbits.RB1 = 1;
             //irrigation = 0x1770;
-            irrigation = 0xC7;
+            irrigation = irrigation_value;
             irrigationSequence = irIrrigation;
         } else if(irrigation > 0){
             irrigation--;
@@ -131,7 +138,7 @@ void __interrupt() tcInt(void) {
         } else if(irrigationSequence == irOffPump){
             PORTBbits.RB1 = 0;
             irrigationSequence = irDelay3End;
-            delay3 = 0xC7;
+            delay3 = delay3_value;
         } else if(delay3 > 0){
             delay3--;
             if(delay3 == 0){
@@ -240,8 +247,8 @@ void configuration_timer1(void){
     
     PIR1bits.TMR1IF = 0; // Clear flag
     
-    TMR1H = 0x3C; // Clear counter
-    TMR1L = 0xB0; // Clear counter
+    TMR1H = TMR1H_; // Clear counter 0.1seg
+    TMR1L = TMR1L_; // Clear counter 0.1seg
     
     PIE1bits.TMR1IE = 1; // TMR1 overflow interrupt enable
     
@@ -254,5 +261,5 @@ void keyStartDown(void){
 }
 void keyStartUp(void){
     irrigationSequence = irStart;
-    delay1 = 0xC8;
+    delay1 = delay1_value;
 }
