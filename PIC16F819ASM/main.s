@@ -61,7 +61,10 @@ retardo2		EQU 0x21
 retardo3		EQU 0x22
 retardo4		EQU 0x23
 watering_loops		EQU 0x24
-	
+sleep_minuts		EQU 0x25
+sleep_seconds		EQU 0x26
+watering_count		EQU 0x27
+		
 	
 
 ;************* banco 0 *************
@@ -135,21 +138,42 @@ main:
 	// Confirmo pulsador precionado?
 	btfsc	PORTA_REG, PORTA_RA1_START
 	goto	main
-	// Llamo a rutina de riego
-	call	watering
+	
+	
+	movlw	0x04
+	movwf	watering_count
+watering_and_pump_refresh_loop:
+	decfsz	watering_count
+	goto	watering_and_pump_refresh	
 	goto	main
 	
+	
+
+watering_and_pump_refresh:
+	// Llamo a rutina de riego 1
+	call	watering
+	// 5 Minutos de descanso (porque salta el guarda motor)
+	call	pump_refresh
+	goto	watering_and_pump_refresh_loop
+	
+
+
+pump_refresh:
+	//Sleep 5min
+	movlw	0x05
+	call	sleep_n_minuts
+	retlw	0x00
+    
+    
 
 watering:
 	bank0
 	//Encender Solenoide
 	bsf	PORTB_REG, PORTB_RB0_SOLENOIDE
 	
-	//Sleep 4seg
-	call	sleep_1_second
-	call	sleep_1_second
-	call	sleep_1_second
-	call	sleep_1_second
+	//Sleep 5seg
+	movlw	0x05
+	call	sleep_n_seconds
 	
 	//Encender bomba
 	bsf	PORTB_REG, PORTB_RB1_PUMP
@@ -161,7 +185,7 @@ watering:
 watering_loop:
 	call	sleep_60_seconds		
 	decfsz	watering_loops
-	call	watering_loop
+	goto	watering_loop
 	
 pump_power_off:
 	//Apagar bomba
@@ -179,19 +203,27 @@ pump_power_off:
 	retlw	0x00
 	
 	
-/*
-sleep_20_seconds:
-	movlw	0x14
-	movwf	retardo4
-sleep_20_seconds_one:
-	decfsz	retardo4
-	goto	sleep_20_seconds_two
-	retlw	0x00
-sleep_20_seconds_two:	
+
+// La cantidad de segundos se debe enviar en el registro W. W > 0
+sleep_n_seconds:
+	movwf	sleep_seconds
+sleep_n_seconds_one:
 	call	sleep_1_second
-	goto	sleep_20_seconds_one
-*/
-	
+	decfsz	sleep_seconds
+	goto	sleep_n_seconds_one
+	retlw	0x00
+
+
+// La cantidad de minutos se debe enviar en el registro W. W > 0
+sleep_n_minuts:
+	movwf	sleep_minuts
+sleep_n_minuts_one:
+	call	sleep_60_seconds
+	decfsz	sleep_minuts
+	goto	sleep_n_minuts_one
+	retlw	0x00
+    
+    
 	
 sleep_60_seconds:
 	movlw	0x37
