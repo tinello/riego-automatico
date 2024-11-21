@@ -21,19 +21,8 @@
 *.properties
 *.production
 *.debug
-RiegoAutomatico.X/html/
-RiegoAutomatico.X/nbproject/private/
-RiegoAutomatico.X/nbproject/Package-*.bash
-RiegoAutomatico.X/build/
-RiegoAutomatico.X/nbbuild/
-RiegoAutomatico.X/dist/
-RiegoAutomatico.X/nbdist/
-RiegoAutomatico.X/nbactions.xml
-RiegoAutomatico.X/nb-configuration.xml
-RiegoAutomatico.X/funclist
-RiegoAutomatico.X/nbproject/Makefile-*
-RiegoAutomatico.X/disassembly/
-RiegoAutomatico.X/.generated_files/
+/RiegoAutomatico.X/build/
+/RiegoAutomatico.X/dist/
 
 # End of https://www.toptal.com/developers/gitignore/api/mplabx
 
@@ -41,6 +30,13 @@ RiegoAutomatico.X/.generated_files/
 /PIC16F819ASM/dist/
 /PIC16F819ASM/defmplabxtrace.*
 
+/PIC12F675.X/build/
+/PIC12F675.X/dist/
+
+
 *.X/_build_mplab
 *.X/.generated-cmakefiles/
 *.X/out/
+*.X/build/
+*.X/dist/
+
