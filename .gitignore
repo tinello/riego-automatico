@@ -27,6 +27,7 @@
 # End of https://www.toptal.com/developers/gitignore/api/mplabx
 
 /PIC16F819ASM/build/
+/PIC16F819ASM/debug/
 /PIC16F819ASM/dist/
 /PIC16F819ASM/defmplabxtrace.*
 
@@ -39,4 +40,5 @@
 *.X/out/
 *.X/build/
 *.X/dist/
+*.X/debug/
 
