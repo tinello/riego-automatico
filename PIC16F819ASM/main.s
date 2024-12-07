@@ -69,31 +69,31 @@ watering_count		EQU 0x27
 
 ;************* banco 0 *************
 bank0	    MACRO
-	    bcf		STATUS_REG, status_IRP
-	    bcf		STATUS_REG, status_RP1
-	    bcf		STATUS_REG, status_RP0
-	    ENDM
+    bcf		STATUS_REG, status_IRP
+    bcf		STATUS_REG, status_RP1
+    bcf		STATUS_REG, status_RP0
+    ENDM
 
 ;************* banco 1 *************
 bank1	    MACRO
-	    bcf		STATUS_REG, status_IRP
-	    bcf		STATUS_REG, status_RP1
-	    bsf		STATUS_REG, status_RP0
-	    ENDM
+    bcf		STATUS_REG, status_IRP
+    bcf		STATUS_REG, status_RP1
+    bsf		STATUS_REG, status_RP0
+    ENDM
 
 ;************* banco 2 *************
 bank2	    MACRO
-	    bsf		STATUS_REG, status_IRP
-	    bsf		STATUS_REG, status_RP1
-	    bcf		STATUS_REG, status_RP0
-	    ENDM
+    bsf		STATUS_REG, status_IRP
+    bsf		STATUS_REG, status_RP1
+    bcf		STATUS_REG, status_RP0
+    ENDM
 
 ;************* banco 3 *************
 bank3	    MACRO
-	    bsf		STATUS, status_IRP
-	    bsf		STATUS, status_RP1
-	    bsf		STATUS, status_RP0
-	    ENDM
+    bsf		STATUS, status_IRP
+    bsf		STATUS, status_RP1
+    bsf		STATUS, status_RP0
+    ENDM
 ;-------------------------------------------
 	
 	
@@ -101,7 +101,7 @@ bank3	    MACRO
 PSECT	code, delta=2, abs
 ORG	0x0000
 resetVector:
-	goto	setup
+    goto	setup
 
 	
 PSECT	code, delta=2, abs
@@ -109,170 +109,170 @@ ORG	0x000A
 setup:
 conf_internal_clock_8mhz:
 	bank1
-	movlw	0x74
-        movwf	OSCCON_REG
+    movlw	0x74
+    movwf	OSCCON_REG
 	
-	movlw	0xFF
-        movwf	TRISA_REG
-	movlw	0x00
-        movwf	TRISB_REG
+    movlw	0xFF
+    movwf	TRISA_REG
+    movlw	0x00
+    movwf	TRISB_REG
 	
-	movlw	0x06
-        movwf	ADCON1_REG
+    movlw	0x06
+    movwf	ADCON1_REG
 	
 	bank0
-	movlw	0x06
-        movwf	ADCON0_REG
+    movlw	0x06
+    movwf	ADCON0_REG
 	
 	//Puerto B apagado
-	movlw	0x00
-        movwf	PORTB_REG
+    movlw	0x00
+    movwf	PORTB_REG
 	
 	
 main:
 	// Pulsador precionado?
-	btfsc	PORTA_REG, PORTA_RA1_START
-	goto	main
+    btfsc	PORTA_REG, PORTA_RA1_START
+    goto	main
 	// Pulsador precionado, llamo a demora.
-	call	sleep_1_tenth
+    call	sleep_1_tenth
 	// Confirmo pulsador precionado?
-	btfsc	PORTA_REG, PORTA_RA1_START
-	goto	main
+    btfsc	PORTA_REG, PORTA_RA1_START
+    goto	main
 	
 	
-	movlw	0x04
-	movwf	watering_count
+    movlw	0x04
+    movwf	watering_count
 watering_and_pump_refresh_loop:
-	decfsz	watering_count
-	goto	watering_and_pump_refresh	
-	goto	main
+    decfsz	watering_count
+    goto	watering_and_pump_refresh	
+    goto	main
 	
 	
 
 watering_and_pump_refresh:
 	// Llamo a rutina de riego 1
-	call	watering
+    call	watering
 	// 5 Minutos de descanso (porque salta el guarda motor)
-	call	pump_refresh
-	goto	watering_and_pump_refresh_loop
+    call	pump_refresh
+    goto	watering_and_pump_refresh_loop
 	
 
 
 pump_refresh:
 	//Sleep 5min
-	movlw	0x05
-	call	sleep_n_minuts
-	retlw	0x00
+    movlw	0x05
+    call	sleep_n_minuts
+    retlw	0x00
     
     
 
 watering:
 	bank0
 	//Encender Solenoide
-	bsf	PORTB_REG, PORTB_RB0_SOLENOIDE
+    bsf	PORTB_REG, PORTB_RB0_SOLENOIDE
 	
 	//Sleep 5seg
-	movlw	0x05
-	call	sleep_n_seconds
+    movlw	0x05
+    call	sleep_n_seconds
 	
 	//Encender bomba
-	bsf	PORTB_REG, PORTB_RB1_PUMP
+    bsf	PORTB_REG, PORTB_RB1_PUMP
 	
 	//Loop for 5 times 1 minute sleep
-	movlw	0x05
-	movwf	watering_loops
+    movlw	0x05
+    movwf	watering_loops
 
 watering_loop:
-	call	sleep_60_seconds		
-	decfsz	watering_loops
-	goto	watering_loop
+    call	sleep_60_seconds		
+    decfsz	watering_loops
+    goto	watering_loop
 	
 pump_power_off:
 	//Apagar bomba
-	bcf	PORTB_REG, PORTB_RB1_PUMP
+    bcf	PORTB_REG, PORTB_RB1_PUMP
 	
 	//Sleep 4seg
-	call	sleep_1_second
-	call	sleep_1_second
-	call	sleep_1_second
-	call	sleep_1_second
+    call	sleep_1_second
+    call	sleep_1_second
+    call	sleep_1_second
+    call	sleep_1_second
 	
 	//Apagar Solenoide
-	bcf	PORTB_REG, PORTB_RB0_SOLENOIDE
+    bcf	PORTB_REG, PORTB_RB0_SOLENOIDE
 	
-	retlw	0x00
+    retlw	0x00
 	
 	
 
 // La cantidad de segundos se debe enviar en el registro W. W > 0
 sleep_n_seconds:
-	movwf	sleep_seconds
+    movwf	sleep_seconds
 sleep_n_seconds_one:
-	call	sleep_1_second
-	decfsz	sleep_seconds
-	goto	sleep_n_seconds_one
-	retlw	0x00
+    call	sleep_1_second
+    decfsz	sleep_seconds
+    goto	sleep_n_seconds_one
+    retlw	0x00
 
 
 // La cantidad de minutos se debe enviar en el registro W. W > 0
 sleep_n_minuts:
-	movwf	sleep_minuts
+    movwf	sleep_minuts
 sleep_n_minuts_one:
-	call	sleep_60_seconds
-	decfsz	sleep_minuts
-	goto	sleep_n_minuts_one
-	retlw	0x00
+    call	sleep_60_seconds
+    decfsz	sleep_minuts
+    goto	sleep_n_minuts_one
+    retlw	0x00
     
     
 	
 sleep_60_seconds:
-	movlw	0x37
-	movwf	retardo4
+    movlw	0x37
+    movwf	retardo4
 sleep_60_seconds_one:
-	decfsz	retardo4
-	goto	sleep_60_seconds_two
-	retlw	0x00
+    decfsz	retardo4
+    goto	sleep_60_seconds_two
+    retlw	0x00
 sleep_60_seconds_two:	
-	call	sleep_1_second
-	goto	sleep_60_seconds_one
+    call	sleep_1_second
+    goto	sleep_60_seconds_one
 	
 	
 	
 sleep_1_second:
 	bank0
-	movlw	0x0C	    ;0x2A
-	movwf	retardo3
+    movlw	0x0C	    ;0x2A
+    movwf	retardo3
 
 sleep_1_second_three:
-	movlw	0xFC
-	movwf	retardo2
+    movlw	0xFC
+    movwf	retardo2
 sleep_1_second_two:
-	movlw	0xFA
-	movwf	retardo1
+    movlw	0xFA
+    movwf	retardo1
 sleep_1_second_one:
-	decfsz	retardo1
-	goto	sleep_1_second_one
+    decfsz	retardo1
+    goto	sleep_1_second_one
 	
-	decfsz	retardo2
-	goto	sleep_1_second_two
+    decfsz	retardo2
+    goto	sleep_1_second_two
 	
-	decfsz	retardo3
-	goto	sleep_1_second_three
+    decfsz	retardo3
+    goto	sleep_1_second_three
 	
-	retlw	0x00
+    retlw	0x00
 	
 sleep_1_tenth:
-	movlw	0x84
-	movwf	retardo2
+    movlw	0x84
+    movwf	retardo2
 sleep_1_tenth_two:
-	movlw	0xFA
-	movwf	retardo1
+    movlw	0xFA
+    movwf	retardo1
 sleep_1_tenth_one:
-	decfsz	retardo1
-	goto	sleep_1_tenth_one
+    decfsz	retardo1
+    goto	sleep_1_tenth_one
 	
-	decfsz	retardo2
-	goto	sleep_1_tenth_two
+    decfsz	retardo2
+    goto	sleep_1_tenth_two
 	
-	retlw	0x00
+    retlw	0x00
 END
