@@ -106,9 +106,14 @@ resetVector:
 	
 PSECT	code, delta=2, abs
 ORG	0x000A
+interruptVector:
+    retfie
+	
+	
+	
 setup:
 conf_internal_clock_8mhz:
-	bank1
+    bank1
     movlw	0x74
     movwf	OSCCON_REG
 	
@@ -120,22 +125,22 @@ conf_internal_clock_8mhz:
     movlw	0x06
     movwf	ADCON1_REG
 	
-	bank0
+    bank0
     movlw	0x06
     movwf	ADCON0_REG
 	
-	//Puerto B apagado
+    //Puerto B apagado
     movlw	0x00
     movwf	PORTB_REG
 	
 	
 main:
-	// Pulsador precionado?
+    // Pulsador precionado?
     btfsc	PORTA_REG, PORTA_RA1_START
     goto	main
-	// Pulsador precionado, llamo a demora.
+    // Pulsador precionado, llamo a demora.
     call	sleep_1_tenth
-	// Confirmo pulsador precionado?
+    // Confirmo pulsador precionado?
     btfsc	PORTA_REG, PORTA_RA1_START
     goto	main
 	
@@ -143,23 +148,24 @@ main:
     movlw	0x04
     movwf	watering_count
 watering_and_pump_refresh_loop:
+    call	watering_and_pump_refresh
     decfsz	watering_count
-    goto	watering_and_pump_refresh	
+    goto	watering_and_pump_refresh_loop
     goto	main
 	
 	
 
 watering_and_pump_refresh:
-	// Llamo a rutina de riego 1
+    // Llamo a rutina de riego 1
     call	watering
-	// 5 Minutos de descanso (porque salta el guarda motor)
+    // 5 Minutos de descanso (porque salta el guarda motor)
     call	pump_refresh
-    goto	watering_and_pump_refresh_loop
+    return
 	
 
 
 pump_refresh:
-	//Sleep 5min
+    //Sleep 5min
     movlw	0x05
     call	sleep_n_minuts
     retlw	0x00
@@ -167,18 +173,18 @@ pump_refresh:
     
 
 watering:
-	bank0
-	//Encender Solenoide
+    bank0
+    //Encender Solenoide
     bsf	PORTB_REG, PORTB_RB0_SOLENOIDE
 	
-	//Sleep 5seg
+    //Sleep 5seg
     movlw	0x05
     call	sleep_n_seconds
 	
-	//Encender bomba
+    //Encender bomba
     bsf	PORTB_REG, PORTB_RB1_PUMP
 	
-	//Loop for 5 times 1 minute sleep
+    //Loop for 5 times 1 minute sleep
     movlw	0x05
     movwf	watering_loops
 
@@ -188,16 +194,16 @@ watering_loop:
     goto	watering_loop
 	
 pump_power_off:
-	//Apagar bomba
+    //Apagar bomba
     bcf	PORTB_REG, PORTB_RB1_PUMP
 	
-	//Sleep 4seg
+    //Sleep 4seg
     call	sleep_1_second
     call	sleep_1_second
     call	sleep_1_second
     call	sleep_1_second
 	
-	//Apagar Solenoide
+    //Apagar Solenoide
     bcf	PORTB_REG, PORTB_RB0_SOLENOIDE
 	
     retlw	0x00
@@ -239,7 +245,7 @@ sleep_60_seconds_two:
 	
 	
 sleep_1_second:
-	bank0
+    bank0
     movlw	0x0C	    ;0x2A
     movwf	retardo3
 
