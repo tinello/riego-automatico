@@ -42,10 +42,29 @@ extern regData keyStart __at(0x020);
 // TMR1L = 0x58;
 
 
-extern volatile unsigned char delay1 __at(0x22);
-extern volatile unsigned char delay2 __at(0x23);
-extern volatile unsigned char delay3 __at(0x24);
-extern volatile unsigned int irrigation __at(0x25);
+extern volatile unsigned char delayBetweenStartToSolenoide  __at(0x22);
+extern volatile unsigned char delayBetweenSolenoideToPump   __at(0x23);
+extern volatile unsigned char delayBetweenPumpToSolenoide   __at(0x24);
+extern volatile unsigned int  delayPumpRefresh              __at(0x25);
+extern volatile unsigned int  irrigation                    __at(0x27);
+
+extern volatile unsigned char FLAGS                         __at(0x29);
+typedef union {
+    struct {
+        unsigned TIMER_100_MS           :1;
+        unsigned TIMER_1_S              :1;
+        unsigned RB2                    :1;
+        unsigned RB3                    :1;
+        unsigned RB4                    :1;
+        unsigned RB5                    :1;
+        unsigned RB6                    :1;
+        unsigned RB7                    :1;
+    };
+} FLAGSbits_t;
+extern volatile FLAGSbits_t FLAGSbits __at(0x2A);
+
+extern volatile unsigned char irrigationCycles   __at(0x2B);
+
 
 
 void configuration(void);
@@ -58,6 +77,8 @@ void configuration_timer1(void);
 
 void keyStartDown(void);
 void keyStartUp(void);
+
+void irrigation_sequence(void);
 
 /**
  * 0x00 Waitting
@@ -72,32 +93,37 @@ void keyStartUp(void);
  * 0x09 Off Solenoide
 */
 unsigned char irrigationSequence;
+unsigned char delayOneSecond;
 
-const unsigned char irWaiting       = 0x00;
-const unsigned char irStart         = 0x01;
-const unsigned char irDelay1End     = 0x02;
-const unsigned char irOnSolenoide   = 0x03;
-const unsigned char irDelay2End     = 0x04;
-const unsigned char irOnPump        = 0x05;
-const unsigned char irIrrigation    = 0x06;
-const unsigned char irOffPump       = 0x07;
-const unsigned char irDelay3End     = 0x08;
-const unsigned char irOffSolenoide  = 0x09;
+const unsigned char irWaiting        = 0x00;
+const unsigned char irStart          = 0x01;
+const unsigned char irDelay1End      = 0x02;
+const unsigned char irOnSolenoide    = 0x03;
+const unsigned char irDelay2End      = 0x04;
+const unsigned char irOnPump         = 0x05;
+const unsigned char irIrrigation     = 0x06;
+const unsigned char irOffPump        = 0x07;
+const unsigned char irDelay3End      = 0x08;
+const unsigned char irOffSolenoide   = 0x09;
+const unsigned char irPumpRefresh    = 0x0A;
+const unsigned char irOffPumpRefresh = 0x0B;
 
 const unsigned char TMR1H_  = 0x9E;
 const unsigned char TMR1L_  = 0x58;
 
-const unsigned char delay1_value  = 0x64;
-const unsigned char delay2_value  = 0x64;
-const unsigned char delay3_value  = 0x64;
-const unsigned int  irrigation_value  = 0x64;
+const unsigned char delayBetweenStartToSolenoide_value  = 0x09;
+const unsigned char delayBetweenSolenoideToPump_value  = 0x05;
+const unsigned char delayBetweenPumpToSolenoide_value  = 0x09;
+const unsigned int  irrigation_value  = 0x012C; // 0x012C => 300
+const unsigned char delayOneSecond_value = 0x09;
+const unsigned int  delayPumpRefresh_value = 0x012C; // 0x012C => 300
 
 
 void __interrupt() tcInt(void) {
     
-    // Valido que la interrucion sea por TMR0
+    // Valido que la interrucion sea por TMR0 / para validar si el boton de inicio se pulso.
     if (INTCONbits.TMR0IF == 1) {
-        if (irrigationSequence == irWaiting) { // Entr solo si no esta iniciada la secuencia de riego.
+        if (irrigationSequence == irWaiting) { // Entra solo si no esta iniciada la secuencia de riego.
             key_events(PORTAbits.RA0, &keyStart, &keyStartDown, &keyStartUp);
         }
         
@@ -105,51 +131,18 @@ void __interrupt() tcInt(void) {
         INTCONbits.TMR0IF = 0;
     }
     
-    // Valido que la interrucion sea por TMR1
+    // Valido que la interrucion sea por TMR1 / timer de riego
     if (PIR1bits.TMR1IF == 1) {
         PIR1bits.TMR1IF = 0;
         TMR1H = TMR1H_; // Clear counter
         TMR1L = TMR1L_; // Clear counter
         
-        if(irrigationSequence == irStart && delay1 > 0){
-            delay1--;
-            if(delay1 == 0){
-                irrigationSequence = irOnSolenoide;
-            }
-        } else if(irrigationSequence == irOnSolenoide){
-            PORTBbits.RB0 = 1;
-            delay2 = delay2_value;
-            irrigationSequence = irDelay2End;
-        } else if(delay2 > 0){
-            delay2--;
-            if(delay2 == 0){
-                irrigationSequence = irOnPump;
-            }
-        } else if(irrigationSequence == irOnPump){
-            PORTBbits.RB1 = 1;
-            //irrigation = 0x1770;
-            irrigation = irrigation_value;
-            irrigationSequence = irIrrigation;
-        } else if(irrigation > 0){
-            irrigation--;
-            if(irrigation == 0){
-                irrigationSequence = irOffPump;
-            }
-        } else if(irrigationSequence == irOffPump){
-            PORTBbits.RB1 = 0;
-            irrigationSequence = irDelay3End;
-            delay3 = delay3_value;
-        } else if(delay3 > 0){
-            delay3--;
-            if(delay3 == 0){
-                irrigationSequence = irOffSolenoide;
-            }
-        } else if(irrigationSequence == irOffSolenoide){
-            PORTBbits.RB0 = 0;
-            irrigationSequence = irWaiting;
+        FLAGSbits.TIMER_100_MS = 1;
+        
+        if (delayOneSecond-- == 0){
+            delayOneSecond = delayOneSecond_value;
+            FLAGSbits.TIMER_1_S = 1;
         }
-        
-        
     }
 }
 
@@ -160,15 +153,79 @@ void main(void) {
     configuration();
     
     PORTB = 0x00;
+    
+    FLAGS = 0x00;
+    
     irrigationSequence = 0x00;
-    delay1 = 0x00;
-    delay2 = 0x00;
-    delay3 = 0x00;
+    delayBetweenStartToSolenoide = 0x00;
+    delayBetweenSolenoideToPump = 0x00;
+    delayBetweenPumpToSolenoide = 0x00;
     irrigation = 0x0000;
+    delayOneSecond = delayOneSecond_value;
   
     while(1) {
+        if(FLAGSbits.TIMER_1_S == 1){
+            FLAGSbits.TIMER_1_S = 0;
+            if (irrigationSequence != irWaiting) { //evito que entre al ciclo de riego, si esta en espera.
+                irrigation_sequence();
+            }
+        }
     }
     return;
+}
+
+void irrigation_sequence(void) {
+    if(irrigationSequence == irStart && delayBetweenStartToSolenoide > 0){ // Retardo de inicio
+        delayBetweenStartToSolenoide--;
+        if(delayBetweenStartToSolenoide == 0){
+            irrigationSequence = irOnSolenoide;
+        }
+    } else if(irrigationSequence == irOnSolenoide){ // Activo solenoide
+        PORTBbits.RB0 = 1;
+        delayBetweenSolenoideToPump = delayBetweenSolenoideToPump_value;
+        irrigationSequence = irDelay2End;
+    } else if(delayBetweenSolenoideToPump > 0){                          // Retardo entre solenoide y bomba
+        delayBetweenSolenoideToPump--;
+        if(delayBetweenSolenoideToPump == 0){
+            irrigationSequence = irOnPump;
+        }
+    } else if(irrigationSequence == irOnPump){      // Activo bomba
+        PORTBbits.RB1 = 1;
+        //irrigation = 0x1770;
+        irrigation = irrigation_value;
+        irrigationSequence = irIrrigation;
+    } else if(irrigation > 0){                      // Retardo de riego
+        irrigation--;
+        if(irrigation == 0){
+            irrigationSequence = irOffPump;
+        }
+    } else if(irrigationSequence == irOffPump){     // Apago bomba
+        PORTBbits.RB1 = 0;
+        irrigationSequence = irDelay3End;
+        delayBetweenPumpToSolenoide = delayBetweenPumpToSolenoide_value;
+    } else if(delayBetweenPumpToSolenoide > 0){                          // Retardo para apagar solenoides
+        delayBetweenPumpToSolenoide--;
+        if(delayBetweenPumpToSolenoide == 0){
+            irrigationSequence = irOffSolenoide;
+        }
+    } else if(irrigationSequence == irOffSolenoide){ // Apago solenoide y fin de riego
+        PORTBbits.RB0 = 0;
+        delayPumpRefresh = delayPumpRefresh_value;
+        irrigationSequence = irPumpRefresh;
+    } else if(irrigationSequence == irPumpRefresh){ // Retardo de enfriamiento de bomba
+        delayPumpRefresh--;
+        if(delayPumpRefresh == 0){
+            irrigationSequence = irOffPumpRefresh;
+        }
+    } else if(irrigationSequence == irOffPumpRefresh){ // Retardo de enfriamiento de bomba
+        if(irrigationCycles > 0) {
+            irrigationCycles--;
+            irrigationSequence = irStart;
+            delayBetweenStartToSolenoide = delayBetweenStartToSolenoide_value; 
+        } else {
+            irrigationSequence = irWaiting;
+        }
+    }
 }
 
 void configuration(void) {
@@ -261,5 +318,6 @@ void keyStartDown(void){
 }
 void keyStartUp(void){
     irrigationSequence = irStart;
-    delay1 = delay1_value;
+    delayBetweenStartToSolenoide = delayBetweenStartToSolenoide_value;
+    irrigationCycles = 0x04;
 }
