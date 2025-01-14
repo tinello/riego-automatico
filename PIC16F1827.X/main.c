@@ -118,7 +118,7 @@ void __interrupt() tcInt(void) {
         PIR1bits.TMR1IF = 0;
         
         if (irrigationSequence == irWaiting) { // Entra solo si no esta iniciada la secuencia de riego.
-            key_events(PORTAbits.RA0, &keyStart, &keyStartDown, &keyStartUp);
+            key_events(PORTAbits.RA1, &keyStart, &keyStartDown, &keyStartUp);
         }
         
         if (delayOneSecond-- == 0){
@@ -154,17 +154,20 @@ int main(void)
     // Disable the Peripheral Interrupts 
     //INTERRUPT_PeripheralInterruptDisable(); 
 
-
     PORTB = 0x00;
     
     FLAGS = 0x00;
     
-    irrigationSequence = 0x00;
+    irrigationSequence = irWaiting;
     delayBetweenStartToSolenoide = 0x00;
     delayBetweenSolenoideToPump = 0x00;
     delayBetweenPumpToSolenoide = 0x00;
     irrigation = 0x0000;
     delayOneSecond = delayOneSecond_value;
+    
+    //__delay_ms(5000);
+    //keyStartUp();
+    
     
     while(1) {
         if(FLAGSbits.TIMER_1_S == 1){
@@ -226,36 +229,47 @@ void irrigation_sequence(void) {
             delayBetweenStartToSolenoide = delayBetweenStartToSolenoide_value; 
         } else {
             irrigationSequence = irWaiting;
+            PORTBbits.RB5 = 0;
+            PORTBbits.RB6 = 0;
+            PORTBbits.RB7 = 0;
         }
     }
 }
 
 
 void configuration_timer1(void){
+    //TGSS T1G_pin; TGGO done; TGSPM disabled; TGTM disabled; TGPOL low; TMRGE disabled; 
+    T1GCON = 0x00;
+    
+    TMR1H = TMR1H_; // Clear counter 0.1seg
+    TMR1L = TMR1L_; // Clear counter 0.1seg
+
+    PIR1bits.TMR1IF = 0; // Clear flag
+    PIE1bits.TMR1IE = 1; // TMR1 overflow interrupt enable
+    
     // Config Timer1 prescala 1:8
+    /*
     T1CONbits.T1CKPS0 = 1;
     T1CONbits.T1CKPS1 = 1;
     T1CONbits.T1OSCEN = 1; // Oscillator is enabled
     T1CONbits.TMR1CS0 = 0; // Internal clock, clock source is instruction clock (FOSC/4)
     T1CONbits.TMR1CS1 = 0; // Internal clock, clock source is instruction clock (FOSC/4)
     T1CONbits.TMR1ON = 0; // Stops Timer1
-    
-    //INTCONbits.PEIE = 1; // Enables all unmasked peripheral interrupts
-    
-    PIR1bits.TMR1IF = 0; // Clear flag
-    
-    TMR1H = TMR1H_; // Clear counter 0.1seg
-    TMR1L = TMR1L_; // Clear counter 0.1seg
-    
-    PIE1bits.TMR1IE = 1; // TMR1 overflow interrupt enable
-    
+    T1CONbits.nT1SYNC = 1;    
     T1CONbits.TMR1ON = 1; // Start Timer1
+     */
+    
+    //TMRON enabled; nTSYNC do_not_synchronize; TCKPS 1:8; TMRCS FOSC/4; TOSCEN disabled; 
+    T1CON = 0x35;
 }
 
 void keyStartDown(void){
     
 }
 void keyStartUp(void){
+    PORTBbits.RB5 = 1;
+    PORTBbits.RB6 = 1;
+    PORTBbits.RB7 = 1;
     irrigationSequence = irStart;
     delayBetweenStartToSolenoide = delayBetweenStartToSolenoide_value;
     irrigationCycles = 0x04;
